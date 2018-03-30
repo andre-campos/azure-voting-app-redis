@@ -48,6 +48,13 @@ if app.config['SHOWHOST'] == "true":
 if not r.get(button1): r.set(button1,0)
 if not r.get(button2): r.set(button2,0)
 
+
+instance = random.randint(1, 10000)
+
+# Update this to change the behavior
+version = 1
+
+instance = 'Version {}; POD {}'.format(version, instance)
 @app.route('/', methods=['GET', 'POST'])
 def index():
 
@@ -58,7 +65,7 @@ def index():
         vote2 = r.get(button2).decode('utf-8')            
 
         # Return index with values
-        return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
+        return render_template("index.html", instance=instance, value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
     elif request.method == 'POST':
 
@@ -69,20 +76,20 @@ def index():
             r.set(button2,0)
             vote1 = r.get(button1).decode('utf-8')
             vote2 = r.get(button2).decode('utf-8')
-            return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
+            return render_template("index.html", instance=instance, value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
         
         else:
 
             # Insert vote result into DB
             vote = request.form['vote']
-            r.incr(vote,1)
+            r.incr(vote, version)
             
             # Get current values
             vote1 = r.get(button1).decode('utf-8')
             vote2 = r.get(button2).decode('utf-8')  
                 
             # Return results
-            return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
+            return render_template("index.html", instance=instance, value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
 if __name__ == "__main__":
     app.run()
