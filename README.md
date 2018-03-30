@@ -48,7 +48,7 @@ The output is plain HTML, but you should be able to see the instance information
         <form id="form" name="form" action="/"" method="post"><center>
         <div id="logo">Azure Voting App</div>
         <div id="space"></div>
-        `**`<p>Instance Version 1; Instance 7050</p>`**`
+        <p>Instance Version 1; Instance 7050</p>
         <div id="form">
         <button name="vote" value="Cats" onclick="send()" class="button button1">Cats</button>
         <button name="vote" value="Dogs" onclick="send()" class="button button2">Dogs</button>
@@ -93,7 +93,7 @@ curl $(minikube service azure-vote-front --url)
         <form id="form" name="form" action="/"" method="post"><center>
         <div id="logo">Azure Voting App</div>
         <div id="space"></div>
-        `**`<p>Instance Version 2; Instance 723</p>`**`
+        <p>Instance Version 2; Instance 723</p>
         <div id="form">
         <button name="vote" value="Cats" onclick="send()" class="button button1">Cats</button>
         <button name="vote" value="Dogs" onclick="send()" class="button button2">Dogs</button>

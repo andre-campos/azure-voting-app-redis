@@ -52,7 +52,7 @@ if not r.get(button2): r.set(button2,0)
 instance = random.randint(1, 10000)
 
 # Update this to change the behavior
-version = 1
+version = 3
 
 instance = 'Version {}; POD {}'.format(version, instance)
 @app.route('/', methods=['GET', 'POST'])
