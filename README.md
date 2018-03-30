@@ -1,21 +1,109 @@
 # Azure Voting App
 
-This sample creates a multi-container application in an Azure Container Service (AKS) cluster. The application interface has been built using Python / Flask. The data component is using Redis.
+Forked from https://github.com/Azure-Samples/azure-voting-app-redis
 
-To walk through a quick deployment of this application, see the AKS [quick start](https://docs.microsoft.com/en-us/azure/aks/kubernetes-walkthrough).
+# Running this with minikube
+Install [minikube](https://github.com/kubernetes/minikube/releases) (OS dependent). Then run minikube:
+```
+$ minikube start --vm-driver="virtualbox" --insecure-registry=192.168.99.1:5000
+```
 
-To walk through a complete experience where this code is packaged into container images, uploaded to Azure Container Registry, and then run in and AKS cluster, see the [AKS tutorials](https://docs.microsoft.com/en-us/azure/aks/tutorial-kubernetes-prepare-app).
 
-## Contributing
+## Creating the images
+It's necessary to create the images within minikube's image registry (as opposed to your local docker registry). You'll need to do this:
+```
+eval $(minikube docker-env)
+cd azure-vote
+docker build . -t microsoft/azure-vote-front:v1
+```
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.microsoft.com.
+## Running the application
+```
+kubectl create -f azure-vote-all-in-one-redis.yaml
+```
+This will create a deployment with 3 replicas of the frontend. You can access minikube's dashboard to make sure the application is healthy using this command:
+```
+minikube dashboard
+```
+Given that you've got curl installed, you can use it to verify the application is actually running:
+```
+curl $(minikube service azure-vote-front --url)
+```
+The output is plain HTML, but you should be able to see the instance information:
+```
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/default.css">
+    <title>Azure Voting App</title>
 
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
+    <script language="JavaScript">
+        function send(form){
+        }
+    </script>
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+</head>
+<body>
+    <div id="container">
+        <form id="form" name="form" action="/"" method="post"><center>
+        <div id="logo">Azure Voting App</div>
+        <div id="space"></div>
+        `**`<p>Instance Version 1; Instance 7050</p>`**`
+        <div id="form">
+        <button name="vote" value="Cats" onclick="send()" class="button button1">Cats</button>
+        <button name="vote" value="Dogs" onclick="send()" class="button button2">Dogs</button>
+        <button name="vote" value="reset" onclick="send()" class="button button3">Reset</button>
+        <div id="space"></div>
+        <div id="space"></div>
+        <div id="results"> Cats - 10 | Dogs - 2 </div> 
+        </form>        
+        </div>
+    </div>     
+</body>
+</html>
+```
+## Updating the Application
+
+Change the version variable in `main.py` and then rebuild the image with a different tag:
+```
+docker build . -t microsoft/azure-vote-front:v2
+```
+After that, use kubectl to update the image:
+```
+kubectl set image deployments/azure-vote-front azure-vote-front=microsoft/azure-vote-front:v2
+```
+Wait a few minutes and you should be able to see the new version running with curl:
+```
+curl $(minikube service azure-vote-front --url)
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <link rel="stylesheet" type="text/css" href="/static/default.css">
+    <title>Azure Voting App</title>
+
+    <script language="JavaScript">
+        function send(form){
+        }
+    </script>
+
+</head>
+<body>
+    <div id="container">
+        <form id="form" name="form" action="/"" method="post"><center>
+        <div id="logo">Azure Voting App</div>
+        <div id="space"></div>
+        `**`<p>Instance Version 2; Instance 723</p>`**`
+        <div id="form">
+        <button name="vote" value="Cats" onclick="send()" class="button button1">Cats</button>
+        <button name="vote" value="Dogs" onclick="send()" class="button button2">Dogs</button>
+        <button name="vote" value="reset" onclick="send()" class="button button3">Reset</button>
+        <div id="space"></div>
+        <div id="space"></div>
+        <div id="results"> Cats - 10 | Dogs - 2 </div> 
+        </form>        
+        </div>
+    </div>     
+</body>
+</html>
+```
